@@ -1,0 +1,34 @@
+{
+  "description": "JSON Web Tokken Implementation",
+  "type": "project",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Awais Mughal",
+      "email": "awaiskhanmughal1995@gmail.com"
+    }
+  ],
+  "require": {
+    "php": "^7.2.34",
+    "firebase/php-jwt": "^6.4",
+    "lcobucci/jwt": "^3.4"
+  },
+  "autoload": {
+    "psr-4": {
+      "YourNamespace\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "YourNamespace\\Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "test": "phpunit"
+  },
+  "config": {
+    "platform": {
+      "php": "7.2.34"
+    }
+  }
+}
