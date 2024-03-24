@@ -1,51 +1,62 @@
+<!DOCTYPE html>
 <?php
+$secretKey = '4614ad021dbcd56d288663982869b0e80d4d51c2198d244b00135c55193ad26e';
+$keyId = 'deb530687c3c36e0bca3a0265d82385c4e256e159f69774c32e714d9245bd5ff';
+?>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Form</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/10.1.1/jsrsasign-all-min.js"></script>
 
-require 'vendor/autoload.php';
+</head>
+<body>
+<div class="container">
+    <div class="wrapper">
+        <div class="title"><span>Login Form</span></div>
+        <form id="formData">
+            <div class="row">
+                <i class="fas fa-user"></i>
+                <input type="text" name="email" placeholder="Email or Phone" required>
+            </div>
+            <div class="row">
+                <i class="fas fa-lock"></i>
+                <input type="password" name="password" placeholder="Password" required>
+            </div>
+            <div class="row button">
+                <input type="submit" value="Login">
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    $(document).ready(function() {
+        $('#formData').submit(function(event) { // Change form ID
+            event.preventDefault();
+            var formDataSerialized = $('#formData').serializeArray();
+            var formData = {};
+            var userFormData = {};
 
-use Lcobucci\JWT\Builder;
-use Lcobucci\JWT\Signer\Hmac\Sha256;
-use Lcobucci\JWT\ValidationData;
-use Lcobucci\JWT\Parser;
+            $.each(formDataSerialized, function(index, field) {
+                formData[field.name] = field.value;
+            });
 
-// Your secret key for encoding and decoding the token
-$secretKey = 'your_secret_key';
-$keyId = 'your_key_id';
+            userFormData.user_details = formData;
+            var formToken = KJUR.jws.JWS.sign(null, {alg: 'HS256', cty: 'JWT'}, JSON.stringify(userFormData), '<?=$secretKey?>');
 
-// Sample data to be encoded in the token
-$payload = array(
-    "user_id" => 123,
-    "username" => "john_doe",
-    "email" => "john.doe@example.com"
-);
-
-// Encode the token
-$token = (new Builder())
-    ->issuedBy('http://example.com') // Configures the issuer (iss claim)
-    ->permittedFor('http://example.org') // Configures the audience (aud claim)
-    ->identifiedBy($keyId, true) // Configures the id (jti claim), duplicates allowed
-    ->issuedAt(new DateTimeImmutable()) // Configures the time that the token was issued (iat claim)
-    ->expiresAt((new DateTimeImmutable())->modify('+1 hour')) // Configures the expiration time of the token (exp claim)
-    ->withHeader('kid', $keyId) // Manually set the 'kid' in the header
-    ->withClaim('user_data', $payload) // Add custom claims
-    ->getToken(new Sha256(), new Lcobucci\JWT\Signer\Key($secretKey)); // Retrieves the generated token
-
-echo "Generated Token: " . $token . "\n\n";
-
-// Decode and verify the token
-try {
-    $token = (new Parser())->parse((string) $token); // Parses from a string
-    $data = new ValidationData();
-    $data->setIssuer('http://example.com');
-    $data->setAudience('http://example.org');
-    $data->setId($keyId);
-
-    $token->validate($data);
-    $userDataClaim = $token->getClaim('user_data');
-
-    echo "<pre>";
-    var_dump($userDataClaim);
-    exit();
-
-} catch (Exception $e) {
-    echo "Token verification failed: " . $e->getMessage() . PHP_EOL;
-}
+            $.ajax({
+                type: 'POST',
+                url: 'login.php',
+                data: {
+                    token: formToken
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>
